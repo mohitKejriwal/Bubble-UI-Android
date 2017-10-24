@@ -26,7 +26,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class MyGdxGame extends ApplicationAdapter implements InputProcessor,GestureDetector.GestureListener {
     float PPM=32f;
-    Body bodyThatWasHit;
+    Body bodyThatWasHit, bodyThatWasTap;
 
     Vector3 point;
     /*SpriteBatch batch;
@@ -101,11 +101,22 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     Sprite sprite;
     ShapeRenderer shapeRenderer;
     Texture img;
-    QueryCallback callback = new QueryCallback() {
+    QueryCallback callbackDrag = new QueryCallback() {
         @Override
         public boolean reportFixture(Fixture fixture) {
             if (fixture.testPoint(point.x / PPM, point.y / PPM)) {
                 bodyThatWasHit = fixture.getBody();
+                return false;
+            } else
+                return true;
+        }
+    };
+
+    QueryCallback callbackTap = new QueryCallback() {
+        @Override
+        public boolean reportFixture(Fixture fixture) {
+            if (fixture.testPoint(point.x / PPM, point.y / PPM)) {
+                bodyThatWasTap = fixture.getBody();                //TODO set user data...
                 return false;
             } else
                 return true;
@@ -404,7 +415,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         camera.unproject(point);
         //batch.draw(texture, touchPos.x, touchPos.y, w, h);
         bodyThatWasHit = null;
-        world.QueryAABB(callback, point.x / PPM - 10, point.y / PPM - 10, point.x / PPM + 10, point.y / PPM + 10);
+        world.QueryAABB(callbackDrag, point.x / PPM - 10, point.y / PPM - 10, point.x / PPM + 10, point.y / PPM + 10);
 
         return false;
     }
@@ -418,7 +429,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        System.out.println("working drag");
+        System.out.println("event working drag");
 
         point = new Vector3(screenX, screenY, 0);
         camera.unproject(point);
@@ -460,7 +471,13 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     @Override
     public boolean tap(float x, float y, int count, int button) {
-        System.out.println("working tap"+x+"  "+y);
+        System.out.println("event working tap" + x + "  " + y);
+        point = new Vector3(x, y, 0);
+        camera.unproject(point);
+        world.QueryAABB(callbackTap, point.x / PPM - 10, point.y / PPM - 10, point.x / PPM + 10, point.y / PPM + 10);
+        if (bodyThatWasTap != null) {
+
+        }
 
         return false;
     }
