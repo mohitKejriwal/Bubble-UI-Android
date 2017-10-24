@@ -265,6 +265,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         position.y = 0;
         camera.position.set(position);
 
+
         camera.update();
         batch1.setProjectionMatrix(camera.combined);
         batch2.setProjectionMatrix(camera.combined);
@@ -275,7 +276,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     }
 
-    public Body createBox(int x, int y, int width, int height) {
+    /*public Body createBox(int x, int y, int width, int height) {
         Body pBody;
         BodyDef def = new BodyDef();
 
@@ -298,7 +299,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         pBody.createFixture(fixtureDef);
         shape.dispose();
         return pBody;
-    }
+    }*/
 
 
     public Body createCircle(float radius,float x,int y){
@@ -329,11 +330,11 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 // Create a fixture definition to apply our shape to
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
-        fixtureDef.density = 0.5f;
+        fixtureDef.density = 1f;
 
 
         //fixtureDef.friction = 0.4f;
-        fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+        //fixtureDef.restitution = 0.6f; // Make it bounce a little bit
 
 // Create our fixture and attach it to the body
         Fixture fixture = body.createFixture(fixtureDef);
@@ -345,12 +346,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         float a =-(round.getPosition().x);
         float b =-(round.getPosition().y);
         float c=(float)Math.sqrt(Math.pow(a, 2)+Math.pow(b, 2));
-        float d= c/10;
+        float d= c/20;
 
-        Vector2 v1 = new Vector2(round.getPosition().x,round.getPosition().y);
-        Vector2 v2 = new Vector2(a/d,b/d);
+        Vector2 v2 = new Vector2(round.getPosition().x,round.getPosition().y);
+        Vector2 v1 = new Vector2(a/d,b/d);
 
-        round.applyForce(v2,v1,false);
+        round.applyForce(v1,v2,false);
 
     }
 
@@ -411,6 +412,15 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         System.out.println("working drag");
+
+        Vector3 touchPos = new Vector3(screenX, screenY, 0);
+        camera.unproject(touchPos);
+        //batch.draw(texture, touchPos.x, touchPos.y, w, h);
+
+
+        round1.setTransform((touchPos.x)/PPM,touchPos.y/PPM,0);
+        //round1.getPosition().set((screenX-(w/2)),(screenY-(h/2)));
+        //round2.getPosition().y=100;
 
 
         return false;
