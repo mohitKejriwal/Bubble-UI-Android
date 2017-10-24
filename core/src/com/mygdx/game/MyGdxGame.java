@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
-import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -21,17 +20,16 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-
 public class MyGdxGame extends ApplicationAdapter implements InputProcessor,GestureDetector.GestureListener {
     float PPM=32f;
-	/*SpriteBatch batch;
+    Body bodyThatWasHit;
+
+    Vector3 point;
+    /*SpriteBatch batch;
 	Texture img;
 	CircleShape circle;
 	World world;
@@ -97,21 +95,26 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     public void resize(int width, int height) {
         super.resize(width, height);
     }*/
-
-
-
-
-    private boolean DEBUG = false;
-
-    private OrthographicCamera camera;
     Array<Body> bodyArray;
-    private Box2DDebugRenderer b2dr;
-    private World world;
     float w,h;
     SpriteBatch batch1,batch2,batch3,batch4,batch5,batch6;
     Sprite sprite;
     ShapeRenderer shapeRenderer;
     Texture img;
+    QueryCallback callback = new QueryCallback() {
+        @Override
+        public boolean reportFixture(Fixture fixture) {
+            if (fixture.testPoint(point.x / PPM, point.y / PPM)) {
+                bodyThatWasHit = fixture.getBody();
+                return false;
+            } else
+                return true;
+        }
+    };
+    private boolean DEBUG = false;
+    private OrthographicCamera camera;
+    private Box2DDebugRenderer b2dr;
+    private World world;
     private Body box,round4,box2,round1,round2,round3,round5,round6;
 
     @Override
@@ -168,7 +171,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         //box = createBox(0, 0, 32, 32, false);
         //box2 = createBox(0, 0, 64, 32);
     }
-
 
     @Override
     public void render() {
@@ -259,23 +261,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         round.setLinearVelocity(0,-20);*/
     }
 
-    public void cameraUpdate(float delta) {
-        Vector3 position = camera.position;
-        position.x = 0;
-        position.y = 0;
-        camera.position.set(position);
-
-
-        camera.update();
-        batch1.setProjectionMatrix(camera.combined);
-        batch2.setProjectionMatrix(camera.combined);
-        batch3.setProjectionMatrix(camera.combined);
-        batch4.setProjectionMatrix(camera.combined);
-        batch5.setProjectionMatrix(camera.combined);
-        batch6.setProjectionMatrix(camera.combined);
-
-    }
-
     /*public Body createBox(int x, int y, int width, int height) {
         Body pBody;
         BodyDef def = new BodyDef();
@@ -301,6 +286,22 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         return pBody;
     }*/
 
+    public void cameraUpdate(float delta) {
+        Vector3 position = camera.position;
+        position.x = 0;
+        position.y = 0;
+        camera.position.set(position);
+
+
+        camera.update();
+        batch1.setProjectionMatrix(camera.combined);
+        batch2.setProjectionMatrix(camera.combined);
+        batch3.setProjectionMatrix(camera.combined);
+        batch4.setProjectionMatrix(camera.combined);
+        batch5.setProjectionMatrix(camera.combined);
+        batch6.setProjectionMatrix(camera.combined);
+
+    }
 
     public Body createCircle(float radius,float x,int y){
 
@@ -355,11 +356,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     }
 
-
     public void drag(float x,float y){
         sprite.setSize(100,100);
     }
-
 
     public void batchUpdate(SpriteBatch batch,Body round){
         batch.begin();
@@ -393,19 +392,27 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        System.out.println("event touchdowns"+((screenX/PPM)-(w/(2*PPM)))+"  "+((screenY/PPM)-(h/(2*PPM))));
-        world.getBodies(bodyArray);
+        System.out.println("event touchdowns");
+       /* world.getBodies(bodyArray);
 
         for (Body bodies:bodyArray) {
             float value;
             System.out.println("event touchdown"+bodies.getWorldCenter().x*PPM+"  "+bodies.getWorldCenter().y*PPM);
-        }
+        }*/
+
+        point = new Vector3(screenX, screenY, 0);
+        camera.unproject(point);
+        //batch.draw(texture, touchPos.x, touchPos.y, w, h);
+        bodyThatWasHit = null;
+        world.QueryAABB(callback, point.x / PPM - 10, point.y / PPM - 10, point.x / PPM + 10, point.y / PPM + 10);
+
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         System.out.println("event touchup");
+        bodyThatWasHit = null;
         return false;
     }
 
@@ -413,12 +420,18 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         System.out.println("working drag");
 
-        Vector3 touchPos = new Vector3(screenX, screenY, 0);
-        camera.unproject(touchPos);
+        point = new Vector3(screenX, screenY, 0);
+        camera.unproject(point);
         //batch.draw(texture, touchPos.x, touchPos.y, w, h);
+       /* bodyThatWasHit = null;
+        world.QueryAABB(callback, point.x/PPM - 10, point.y/PPM - 10, point.x/PPM + 10, point.y/PPM + 10);*/
 
+        if (bodyThatWasHit != null) {
+            bodyThatWasHit.setTransform((point.x) / PPM, point.y / PPM, 0);
 
-        round1.setTransform((touchPos.x)/PPM,touchPos.y/PPM,0);
+            // Do something with the body
+        }
+
         //round1.getPosition().set((screenX-(w/2)),(screenY-(h/2)));
         //round2.getPosition().y=100;
 
