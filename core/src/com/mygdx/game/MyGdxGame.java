@@ -116,7 +116,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         @Override
         public boolean reportFixture(Fixture fixture) {
             if (fixture.testPoint(point.x / PPM, point.y / PPM)) {
-                bodyThatWasTap = fixture.getBody();                //TODO set user data...
+                bodyThatWasTap = fixture.getBody();
                 return false;
             } else
                 return true;
@@ -126,7 +126,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     private OrthographicCamera camera;
     private Box2DDebugRenderer b2dr;
     private World world;
-    private Body box,round4,box2,round1,round2,round3,round5,round6;
+    private Body round4, round1, round2, round3, round5, round6;
 
     @Override
     public void create () {
@@ -247,10 +247,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         //sprite.setPosition(round1.getPosition().x - sprite.getWidth()/2, round1.getPosition().y - sprite.getHeight()/2);
 
 
-
+        cameraUpdate(1f);
 
         inputUpdate(delta);
-        cameraUpdate(delta);
     }
 
     public void inputUpdate(float delta) {
@@ -330,6 +329,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
 
+
 // Create our body in the world using our body definition
         Body body = world.createBody(bodyDef);
 
@@ -345,6 +345,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         fixtureDef.density = 1f;
 
 
+
         //fixtureDef.friction = 0.4f;
         //fixtureDef.restitution = 0.6f; // Make it bounce a little bit
 
@@ -358,7 +359,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         float a =-(round.getPosition().x);
         float b =-(round.getPosition().y);
         float c=(float)Math.sqrt(Math.pow(a, 2)+Math.pow(b, 2));
-        float d= c/20;
+        float d = c / 5;
 
         Vector2 v2 = new Vector2(round.getPosition().x,round.getPosition().y);
         Vector2 v1 = new Vector2(a/d,b/d);
@@ -367,9 +368,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     }
 
-    public void drag(float x,float y){
-        sprite.setSize(100,100);
-    }
 
     public void batchUpdate(SpriteBatch batch,Body round){
         batch.begin();
@@ -403,7 +401,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        System.out.println("event touchdowns");
        /* world.getBodies(bodyArray);
 
         for (Body bodies:bodyArray) {
@@ -414,7 +411,13 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         point = new Vector3(screenX, screenY, 0);
         camera.unproject(point);
         //batch.draw(texture, touchPos.x, touchPos.y, w, h);
+
         bodyThatWasHit = null;
+        /*point.x=(point.x-w/2);
+        point.y=(point.y-h/2);*/
+
+        System.out.println("event touchdowns" + (point.x) + " " + (point.y));
+
         world.QueryAABB(callbackDrag, point.x / PPM - 10, point.y / PPM - 10, point.x / PPM + 10, point.y / PPM + 10);
 
         return false;
@@ -476,6 +479,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         camera.unproject(point);
         world.QueryAABB(callbackTap, point.x / PPM - 10, point.y / PPM - 10, point.x / PPM + 10, point.y / PPM + 10);
         if (bodyThatWasTap != null) {
+            bodyThatWasTap.setUserData("selected");
+
+        } else {
 
         }
 
