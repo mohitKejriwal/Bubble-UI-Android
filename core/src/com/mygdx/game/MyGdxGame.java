@@ -16,18 +16,23 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.ArrayList;
+
 public class MyGdxGame extends ApplicationAdapter implements InputProcessor,GestureDetector.GestureListener {
-    float PPM=32f;
+    float PPM = 32f, alpha = 0.5f;
     Body bodyThatWasHit, bodyThatWasTap;
 
+    int batchW = 40, batchH = 40;
+    List<Body> bodyList;
+    ArrayList<SpriteBatch> batchList;
     Vector3 point;
     /*SpriteBatch batch;
 	Texture img;
@@ -124,12 +129,13 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     };
     private boolean DEBUG = false;
     private OrthographicCamera camera;
-    private Box2DDebugRenderer b2dr;
+    //private Box2DDebugRenderer b2dr;
     private World world;
     private Body round4, round1, round2, round3, round5, round6;
 
     @Override
     public void create () {
+        batchList = new ArrayList<SpriteBatch>();
         w = Gdx.graphics.getWidth();
         h = Gdx.graphics.getHeight();
 /*
@@ -146,7 +152,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         camera.setToOrtho(false, w / 2, h / 2);
 
         world = new World(new Vector2(0, 0), false);
-        b2dr = new Box2DDebugRenderer();
+        //b2dr = new Box2DDebugRenderer();
 
         batch1 = new SpriteBatch();
         batch2 = new SpriteBatch();
@@ -155,7 +161,14 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         batch5 = new SpriteBatch();
         batch6 = new SpriteBatch();
 
-        bodyArray = new Array<Body>();
+        batchList.add(batch1);
+        batchList.add(batch2);
+        batchList.add(batch3);
+        batchList.add(batch4);
+        batchList.add(batch5);
+        batchList.add(batch6);
+
+
         // We will use the default LibGdx logo for this example, but we need a
         //sprite since it's going to move
         img = new Texture("badlogic.jpg");
@@ -164,15 +177,17 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         //sprite.setColor(com.badlogic.gdx.graphics.Color.BLACK);
 
 
+
         // Center the sprite in the top/middle of the screen
          shapeRenderer = new ShapeRenderer();
 
-        round1 = createCircle(1f,1,1);
-        round2 = createCircle(1f,-100,-100);
-        round3 = createCircle(1f,-100,100);
-        round4 = createCircle(1f,100,-100);
-        round5 = createCircle(1f,0,100);
-        round6 = createCircle(1f,-100,0);
+
+        round1 = createCircle(1f, 1, 1, 0);
+        round2 = createCircle(1f, -100, -100, 1);
+        round3 = createCircle(1f, -100, 100, 2);
+        round4 = createCircle(1f, 100, -100, 3);
+        round5 = createCircle(1f, 0, 100, 4);
+        round6 = createCircle(1f, -100, 0, 5);
 
 
         //sprite.setOriginCenter();
@@ -192,7 +207,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
-        b2dr.render(world, camera.combined.scl(PPM));
+        //b2dr.render(world, camera.combined.scl(PPM));
 
         /*shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -229,7 +244,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     @Override
     public void dispose() {
         world.dispose();
-        b2dr.dispose();
+        //b2dr.dispose();
         img.dispose();
     }
 
@@ -313,7 +328,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     }
 
-    public Body createCircle(float radius,float x,int y){
+    public Body createCircle(float radius, float x, int y, int pos) {
 
         BodyDef bodyDef = new BodyDef();
 // We set our body to dynamic, for something like ground which doesn't move we would set it to StaticBody
@@ -336,7 +351,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 // Create a circle shape and set its radius to 6
         CircleShape circle = new CircleShape();
-        circle.setRadius(radius);
+        circle.setRadius(1.2f);
 
 
 // Create a fixture definition to apply our shape to
@@ -345,13 +360,13 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         fixtureDef.density = 1f;
 
 
-
-        //fixtureDef.friction = 0.4f;
-        //fixtureDef.restitution = 0.6f; // Make it bounce a little bit
+        fixtureDef.friction = 0.4f;
+        fixtureDef.restitution = 0.6f; // Make it bounce a little bit
 
 // Create our fixture and attach it to the body
         Fixture fixture = body.createFixture(fixtureDef);
         circle.dispose();
+        body.setUserData(new String[]{"unselected", String.valueOf(pos)});
         return  body;
     }
 
@@ -374,8 +389,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
         //batch.draw(sprite, round1.getPosition().x*PPM,round1.getPosition().y*PPM);
-        batch.draw(sprite, round.getPosition().x*PPM - sprite.getWidth()/2f,round.getPosition().y*PPM - sprite.getHeight()/2f,40,40);
-        batch.setColor(255f,255f,255f,0.5f);
+        batch.draw(sprite, round.getPosition().x * PPM - sprite.getWidth() / 2f, round.getPosition().y * PPM - sprite.getHeight() / 2f, batchW, batchH);
+        batch.setColor(255, 255, 255, alpha);
 
         batch.end();
     }
@@ -479,9 +494,21 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         camera.unproject(point);
         world.QueryAABB(callbackTap, point.x / PPM - 10, point.y / PPM - 10, point.x / PPM + 10, point.y / PPM + 10);
         if (bodyThatWasTap != null) {
-            bodyThatWasTap.setUserData("selected");
+            String[] data = (String[]) bodyThatWasHit.getUserData();
+            batchList.get(Integer.parseInt(data[1]));
+            if (data[0].equalsIgnoreCase("selected")) {
+                batchH = 40;
+                batchH = 40;
 
+                bodyThatWasTap.setUserData(new String[]{"unselected", data[1]});
+            } else {
+                batchW = 60;
+                batchW = 60;
+
+                bodyThatWasTap.setUserData(new String[]{"selected", data[1]});
+            }
         } else {
+
 
         }
 
