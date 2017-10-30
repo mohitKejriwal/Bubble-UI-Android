@@ -22,6 +22,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
 
@@ -31,6 +32,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     int batchW = 40, batchH = 40;
     ArrayList<Body> bodyList;
+    Array<Body> bodies;
     ArrayList<SpriteBatch> batchList, batchCList;
     Vector3 point;
     FixtureDef fixtureDefSmall, fixtureDefBig;
@@ -103,7 +105,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         super.resize(width, height);
     }*/
     float w,h;
-    SpriteBatch batch1, batch2, batch3, batch4, batch5, batch6, batchc1, batchc2, batchc3, batchc4, batchc5, batchc6, newBatch;
+    SpriteBatch batch1, batch2, batch3, batch4, batch5, batch6, batchc1, batchc2, batchc3, batchc4, batchc5, batchc6;
     Sprite sprite, spriteCircle;
     ShapeRenderer shapeRenderer;
     Texture img, imgCircle;
@@ -128,6 +130,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
                 return true;
         }
     };
+    float prevX, prevY;
     private boolean DEBUG = false;
     private OrthographicCamera camera;
     //private Box2DDebugRenderer b2dr;
@@ -138,6 +141,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     public void create () {
         batchList = new ArrayList<SpriteBatch>();
         batchCList = new ArrayList<SpriteBatch>();
+        bodies = new Array<Body>();
 
         bodyList = new ArrayList<Body>();
 
@@ -157,6 +161,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         camera.setToOrtho(false, w / 2, h / 2);
 
         world = new World(new Vector2(0, 0), false);
+
         //b2dr = new Box2DDebugRenderer();
 
         batch1 = new SpriteBatch();
@@ -213,8 +218,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         round5 = createCircle(1f, 0, 100, 4);
         round6 = createCircle(1f, -100, 0, 5);
 
+        world.getBodies(bodies);
 
-        circleSmall.dispose();
         //circleBig.dispose();
         //sprite.setOriginCenter();
         //sprite.setPosition(round1.getPosition().x*PPM,round1.getPosition().y*PPM);
@@ -277,6 +282,14 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         //b2dr.dispose();
         img.dispose();
         imgCircle.dispose();
+        circleSmall.dispose();
+        for (SpriteBatch spritebatch : batchList) {
+            spritebatch.dispose();
+        }
+        for (SpriteBatch spritebatch : batchCList) {
+            spritebatch.dispose();
+        }
+
     }
 
     public void update(float delta) {
@@ -299,25 +312,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         cameraUpdate(1f);
 
         //inputUpdate(delta);
-    }
-
-    public void inputUpdate(float delta) {
-       /* int horizontalForce = 0;
-
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            horizontalForce -= 1;
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            horizontalForce += 1;
-        }
-
-        if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            round.applyForceToCenter(0, 300, false);
-        }
-
-        round.setLinearVelocity(0, horizontalForce * 5);*/
-      /* box2.setLinearVelocity(0,10);
-        round.setLinearVelocity(0,-20);*/
     }
 
     /*public Body createBox(int x, int y, int width, int height) {
@@ -344,6 +338,25 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         shape.dispose();
         return pBody;
     }*/
+
+    public void inputUpdate(float delta) {
+       /* int horizontalForce = 0;
+
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            horizontalForce -= 1;
+        }
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            horizontalForce += 1;
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            round.applyForceToCenter(0, 300, false);
+        }
+
+        round.setLinearVelocity(0, horizontalForce * 5);*/
+      /* box2.setLinearVelocity(0,10);
+        round.setLinearVelocity(0,-20);*/
+    }
 
     public void cameraUpdate(float delta) {
         Vector3 position = camera.position;
@@ -403,7 +416,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         float a =-(round.getPosition().x);
         float b =-(round.getPosition().y);
         float c=(float)Math.sqrt(Math.pow(a, 2)+Math.pow(b, 2));
-        float d = c / 5;
+        float d = c / 50;
 
         Vector2 v2 = new Vector2(round.getPosition().x,round.getPosition().y);
         Vector2 v1 = new Vector2(a/d,b/d);
@@ -412,6 +425,35 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     }
 
+    public void motionUpdate(float a, float b) {
+
+        float c = (float) Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+        float d = c / 50;
+        Vector2 v1 = new Vector2(a / d, b / d);
+
+        for (Body body : bodyList) {
+            Vector2 v2 = new Vector2(body.getPosition().x, body.getPosition().y);
+
+            body.applyForce(v1, v2, false);
+
+
+        }
+
+    }
+
+    public void bodyMotionUpdate(float a, float b, Body body) {
+
+        float c = (float) Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+        float d = c;
+        Vector2 v1 = new Vector2(a / d, b / d);
+
+
+        Vector2 v2 = new Vector2(body.getPosition().x, body.getPosition().y);
+
+        body.applyForce(v1, v2, false);
+
+
+    }
 
     public void batchUpdate(SpriteBatch batchCircle, SpriteBatch batch, Body round) {
 
@@ -482,10 +524,13 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
             System.out.println("event touchdown"+bodies.getWorldCenter().x*PPM+"  "+bodies.getWorldCenter().y*PPM);
         }*/
 
+
         point = new Vector3(screenX, screenY, 0);
         camera.unproject(point);
         //batch.draw(texture, touchPos.x, touchPos.y, w, h);
 
+        prevX = (point.x / PPM);
+        prevY = (point.y / PPM);
         bodyThatWasHit = null;
         /*point.x=(point.x-w/2);
         point.y=(point.y-h/2);*/
@@ -501,6 +546,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         System.out.println("event touchup");
         bodyThatWasHit = null;
+        prevX = 0;
+        prevY = 0;
         return false;
     }
 
@@ -508,17 +555,45 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         System.out.println("event working drag");
 
+
         point = new Vector3(screenX, screenY, 0);
+        /*Vector3 pointless = new Vector3();
+        pointless.x = point.x;
+        pointless.y = point.y;
+        pointless.z = point.z;*/
         camera.unproject(point);
+
+
         //batch.draw(texture, touchPos.x, touchPos.y, w, h);
        /* bodyThatWasHit = null;
         world.QueryAABB(callback, point.x/PPM - 10, point.y/PPM - 10, point.x/PPM + 10, point.y/PPM + 10);*/
 
-        if (bodyThatWasHit != null) {
-            bodyThatWasHit.setTransform((point.x) / PPM, point.y / PPM, 0);
+       /* if (bodyThatWasHit != null) {
+            //bodyThatWasHit.setTransform((point.x) / PPM, point.y / PPM, 0);
 
+            bodyMotionUpdate(-(prevX - (point.x/PPM)),-(prevY-(point.y/PPM)),bodyThatWasHit);
+            prevX = (point.x/PPM);
+            prevY = (point.y/PPM);
             // Do something with the body
         }
+        else{*/
+
+        //System.out.println("pointer pos"+pointer);
+
+
+        //body.setTransform((body.getPosition().x+(point.x)) / PPM, 0, 0);
+
+          /*  for (Body body:bodyList) {
+
+                body.setTransform();
+            }*/
+
+
+        motionUpdate(-(prevX - (point.x / PPM)), -(prevY - (point.y / PPM)));
+        prevX = (point.x / PPM);
+        prevY = (point.y / PPM);
+
+
 
         //round1.getPosition().set((screenX-(w/2)),(screenY-(h/2)));
         //round2.getPosition().y=100;
@@ -552,13 +627,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         point = new Vector3(x, y, 0);
         camera.unproject(point);
         world.QueryAABB(callbackTap, point.x / PPM - 10, point.y / PPM - 10, point.x / PPM + 10, point.y / PPM + 10);
-        try {
+
             if (bodyThatWasTap != null) {
-                String[] data = (String[]) bodyThatWasHit.getUserData();
+                String[] data = (String[]) bodyThatWasTap.getUserData();
                 batchList.get(Integer.parseInt(data[1]));
                 if (data[0].equalsIgnoreCase("selected")) {
-                    batchH = 40;
-                    batchW = 40;
+
                     /*bodyThatWasTap.destroyFixture(fixBig);
                     bodyThatWasTap.createFixture(fixtureDefSmall);*/
                     /*bodyList.remove(bodyThatWasTap);
@@ -579,9 +653,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+
+        bodyThatWasTap = null;
 
         return false;
     }
@@ -624,7 +698,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     public void createFixtureDef() {
         circleSmall = new CircleShape();
-        circleSmall.setRadius(1.5f);
+        circleSmall.setRadius(1.3f);
 
        /* circleBig = new CircleShape();
         circleBig.setRadius(1.5f);*/
@@ -636,8 +710,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         fixtureDefSmall.density = 1f;
 
 
-        fixtureDefSmall.friction = 0.4f;
-        fixtureDefSmall.restitution = 0.6f;
+        //fixtureDefSmall.friction = 0.4f;
+        fixtureDefSmall.restitution = 0.5f;
 
 
        /* fixtureDefBig = new FixtureDef();
