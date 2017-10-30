@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,7 +17,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -103,7 +103,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         super.resize(width, height);
     }*/
     float w,h;
-    SpriteBatch batch1, batch2, batch3, batch4, batch5, batch6, batchc1, batchc2, batchc3, batchc4, batchc5, batchc6;
+    SpriteBatch batch1, batch2, batch3, batch4, batch5, batch6, batchc1, batchc2, batchc3, batchc4, batchc5, batchc6, newBatch;
     Sprite sprite, spriteCircle;
     ShapeRenderer shapeRenderer;
     Texture img, imgCircle;
@@ -130,7 +130,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     };
     private boolean DEBUG = false;
     private OrthographicCamera camera;
-    private Box2DDebugRenderer b2dr;
+    //private Box2DDebugRenderer b2dr;
     private World world;
     private Body round4, round1, round2, round3, round5, round6;
 
@@ -157,7 +157,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         camera.setToOrtho(false, w / 2, h / 2);
 
         world = new World(new Vector2(0, 0), false);
-        b2dr = new Box2DDebugRenderer();
+        //b2dr = new Box2DDebugRenderer();
 
         batch1 = new SpriteBatch();
         batch2 = new SpriteBatch();
@@ -166,6 +166,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         batch5 = new SpriteBatch();
         batch6 = new SpriteBatch();
 
+        //newBatch = new SpriteBatch();
         batchc1 = new SpriteBatch();
         batchc2 = new SpriteBatch();
         batchc3 = new SpriteBatch();
@@ -190,11 +191,11 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         // We will use the default LibGdx logo for this example, but we need a
         //sprite since it's going to move
         img = new Texture("badlogic.jpg");
-        //imgCircle = new Texture("circle.png");
+        imgCircle = new Texture("circle.png");
 
         sprite = new Sprite(img);
-        //spriteCircle = new Sprite(imgCircle);
-        //spriteCircle.setSize(60,60);
+        spriteCircle = new Sprite(imgCircle);
+        spriteCircle.setSize(80, 80);
         sprite.setSize(40,40);
         //sprite.setColor(com.badlogic.gdx.graphics.Color.BLACK);
 
@@ -232,7 +233,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
-        b2dr.render(world, camera.combined.scl(PPM));
+        //b2dr.render(world, camera.combined.scl(PPM));
+
+
 
         /*shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -273,7 +276,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         world.dispose();
         //b2dr.dispose();
         img.dispose();
-        //imgCircle.dispose();
+        imgCircle.dispose();
     }
 
     public void update(float delta) {
@@ -350,6 +353,13 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
         camera.update();
+        batchc1.setProjectionMatrix(camera.combined);
+        batchc2.setProjectionMatrix(camera.combined);
+        batchc3.setProjectionMatrix(camera.combined);
+        batchc4.setProjectionMatrix(camera.combined);
+        batchc5.setProjectionMatrix(camera.combined);
+        batchc6.setProjectionMatrix(camera.combined);
+        //newBatch.setProjectionMatrix(camera.combined);
         batch1.setProjectionMatrix(camera.combined);
         batch2.setProjectionMatrix(camera.combined);
         batch3.setProjectionMatrix(camera.combined);
@@ -357,12 +367,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         batch5.setProjectionMatrix(camera.combined);
         batch6.setProjectionMatrix(camera.combined);
 
-        /*batchc1.setProjectionMatrix(camera.combined);
-        batchc2.setProjectionMatrix(camera.combined);
-        batchc3.setProjectionMatrix(camera.combined);
-        batchc4.setProjectionMatrix(camera.combined);
-        batchc5.setProjectionMatrix(camera.combined);
-        batchc6.setProjectionMatrix(camera.combined);*/
+
     }
 
     public Body createCircle(float radius, float x, int y, int pos) {
@@ -409,6 +414,20 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
     public void batchUpdate(SpriteBatch batchCircle, SpriteBatch batch, Body round) {
+
+
+        batchCircle.begin();
+        //batchCircle.begin();
+
+
+        //batch.draw(sprite, round1.getPosition().x*PPM,round1.getPosition().y*PPM);
+        batchCircle.draw(spriteCircle, round.getPosition().x * PPM - 80 / 2f, round.getPosition().y * PPM - 80 / 2f, 80, 80);
+        //batchCircle.draw(spriteCircle, round.getPosition().x * PPM - spriteCircle.getWidth() / 2f, round.getPosition().y * PPM - spriteCircle.getHeight() / 2f, batchW, batchH);
+        batchCircle.setColor(Color.valueOf("#FF0000"));
+
+        //batchCircle.setColor(255, 255, 255, 1);
+
+        batchCircle.end();
         batch.begin();
         //batchCircle.begin();
 
@@ -421,15 +440,17 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         //batchCircle.setColor(255, 255, 255, 1);
 
         batch.end();
+
+
         //batchCircle.end();
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+       /* shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(255.0f, 255.0f, 255.0f, 1);
-       /* point = new Vector3(round1.getPosition().x, round1.getPosition().y, 0);
-        camera.unproject(point);*/
+       *//* point = new Vector3(round1.getPosition().x, round1.getPosition().y, 0);
+        camera.unproject(point);*//*
 
-        shapeRenderer.circle(round.getPosition().x * PPM, round.getPosition().y * PPM, 100);
-        shapeRenderer.end();
+        shapeRenderer.circle(round.getPosition().x * PPM + (w/2) -50, round.getPosition().y * PPM +(h/2)-50, 100);
+        shapeRenderer.end();*/
 
     }
 
@@ -546,8 +567,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
                     bodyList.add(Integer.parseInt(data[1]),bodyThatWasTap);*/
                     bodyThatWasTap.setUserData(new String[]{"unselected", data[1]});
                 } else {
-                    batchH = 60;
-                    batchW = 60;
+
 
                     /*bodyThatWasTap.destroyFixture(fixSmall);
                     fixBig = */
@@ -604,7 +624,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     public void createFixtureDef() {
         circleSmall = new CircleShape();
-        circleSmall.setRadius(1.2f);
+        circleSmall.setRadius(1.5f);
 
        /* circleBig = new CircleShape();
         circleBig.setRadius(1.5f);*/
