@@ -219,7 +219,13 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         round5 = createCircle(1f, 0, 100, 4);
         round6 = createCircle(1f, -100, 0, 5);
 
-        createWall();
+        point = new Vector3(w / 2, h / 2, 0);
+        camera.unproject(point);
+        createWall(-point.x / (PPM), point.y / (PPM), point.x / (PPM), point.y / (PPM));
+        createWall(-point.x / (PPM), -point.y / (PPM), point.x / (PPM), -point.y / (PPM));
+        createWall(-point.x / (PPM), point.y / (PPM), -point.x / (PPM), -point.y / (PPM));
+        createWall(point.x / (PPM), point.y / (PPM), point.x / (PPM), -point.y / (PPM));
+
         //world.getBodies(bodies);
 
         //circleBig.dispose();
@@ -317,7 +323,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         //inputUpdate(delta);
     }
 
-    public Body createWall() {
+    public Body createWall(float x1, float x2, float x3, float x4) {
        /* Body pBody;
         BodyDef def = new BodyDef();
 
@@ -341,13 +347,14 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         shape.dispose();*/
 
 
+
         BodyDef bodyDef2 = new BodyDef();
         bodyDef2.type = BodyDef.BodyType.StaticBody;
-        bodyDef2.position.set(0, -10);
+        bodyDef2.position.set(0, 0);
 
 
         EdgeShape edgeShape = new EdgeShape();
-        edgeShape.set(0, 0, w / 3, h / 3);
+        edgeShape.set(x1, x2, x3, x4);
         FixtureDef fixtureDef2 = new FixtureDef();
         fixtureDef2.shape = edgeShape;
         fixtureDef2.restitution = 0.6f;
@@ -690,6 +697,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
+
+        System.out.println("event fling");
         return false;
     }
 
