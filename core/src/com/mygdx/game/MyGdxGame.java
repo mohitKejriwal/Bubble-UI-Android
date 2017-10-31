@@ -17,12 +17,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
 
@@ -32,7 +33,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     int batchW = 40, batchH = 40;
     ArrayList<Body> bodyList;
-    Array<Body> bodies;
+    //Array<Body> bodies;
     ArrayList<SpriteBatch> batchList, batchCList;
     Vector3 point;
     FixtureDef fixtureDefSmall, fixtureDefBig;
@@ -133,7 +134,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     float prevX, prevY;
     private boolean DEBUG = false;
     private OrthographicCamera camera;
-    //private Box2DDebugRenderer b2dr;
+    private Box2DDebugRenderer b2dr;
     private World world;
     private Body round4, round1, round2, round3, round5, round6;
 
@@ -141,7 +142,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     public void create () {
         batchList = new ArrayList<SpriteBatch>();
         batchCList = new ArrayList<SpriteBatch>();
-        bodies = new Array<Body>();
+        //bodies = new Array<Body>();
 
         bodyList = new ArrayList<Body>();
 
@@ -162,7 +163,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
         world = new World(new Vector2(0, 0), false);
 
-        //b2dr = new Box2DDebugRenderer();
+        b2dr = new Box2DDebugRenderer();
 
         batch1 = new SpriteBatch();
         batch2 = new SpriteBatch();
@@ -207,7 +208,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
         // Center the sprite in the top/middle of the screen
-         shapeRenderer = new ShapeRenderer();
+        //shapeRenderer = new ShapeRenderer();
 
 
         createFixtureDef();
@@ -218,7 +219,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         round5 = createCircle(1f, 0, 100, 4);
         round6 = createCircle(1f, -100, 0, 5);
 
-        world.getBodies(bodies);
+        createWall();
+        //world.getBodies(bodies);
 
         //circleBig.dispose();
         //sprite.setOriginCenter();
@@ -238,7 +240,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
-        //b2dr.render(world, camera.combined.scl(PPM));
+        b2dr.render(world, camera.combined.scl(PPM));
 
 
 
@@ -279,10 +281,11 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     @Override
     public void dispose() {
         world.dispose();
-        //b2dr.dispose();
+        b2dr.dispose();
         img.dispose();
         imgCircle.dispose();
         circleSmall.dispose();
+
         for (SpriteBatch spritebatch : batchList) {
             spritebatch.dispose();
         }
@@ -314,8 +317,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         //inputUpdate(delta);
     }
 
-    /*public Body createBox(int x, int y, int width, int height) {
-        Body pBody;
+    public Body createWall() {
+       /* Body pBody;
         BodyDef def = new BodyDef();
 
 
@@ -335,9 +338,26 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         //fixtureDef.friction = 0.4f;
         fixtureDef.restitution = 0.6f;
         pBody.createFixture(fixtureDef);
-        shape.dispose();
-        return pBody;
-    }*/
+        shape.dispose();*/
+
+
+        BodyDef bodyDef2 = new BodyDef();
+        bodyDef2.type = BodyDef.BodyType.StaticBody;
+        bodyDef2.position.set(0, -10);
+
+
+        EdgeShape edgeShape = new EdgeShape();
+        edgeShape.set(0, 0, w / 3, h / 3);
+        FixtureDef fixtureDef2 = new FixtureDef();
+        fixtureDef2.shape = edgeShape;
+        fixtureDef2.restitution = 0.6f;
+        fixtureDef2.density = 0.5f;
+
+        Body bodyEdgeScreen = world.createBody(bodyDef2);
+        bodyEdgeScreen.createFixture(fixtureDef2);
+        edgeShape.dispose();
+        return bodyEdgeScreen;
+    }
 
     public void inputUpdate(float delta) {
        /* int horizontalForce = 0;
@@ -416,26 +436,28 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         float a =-(round.getPosition().x);
         float b =-(round.getPosition().y);
         float c=(float)Math.sqrt(Math.pow(a, 2)+Math.pow(b, 2));
-        float d = c / 50;
+        float d = c / 5;
 
         Vector2 v2 = new Vector2(round.getPosition().x,round.getPosition().y);
         Vector2 v1 = new Vector2(a/d,b/d);
 
         round.applyForce(v1,v2,false);
-
+       /* round.setLinearVelocity(v1);
+        round.setLinearDamping(1f);
+*/
     }
 
     public void motionUpdate(float a, float b) {
 
         float c = (float) Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
-        float d = c / 50;
+        float d = c / 20;
         Vector2 v1 = new Vector2(a / d, b / d);
 
         for (Body body : bodyList) {
-            Vector2 v2 = new Vector2(body.getPosition().x, body.getPosition().y);
+            //Vector2 v2 = new Vector2(body.getPosition().x, body.getPosition().y);
 
-            body.applyForce(v1, v2, false);
-
+            //body.applyForce(v1, v2, false);
+            body.setLinearVelocity(v1);
 
         }
 
@@ -456,6 +478,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     }
 
     public void batchUpdate(SpriteBatch batchCircle, SpriteBatch batch, Body round) {
+
 
 
         batchCircle.begin();
@@ -698,7 +721,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     public void createFixtureDef() {
         circleSmall = new CircleShape();
-        circleSmall.setRadius(1.3f);
+        circleSmall.setRadius(1.5f);
 
        /* circleBig = new CircleShape();
         circleBig.setRadius(1.5f);*/
@@ -723,5 +746,10 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         fixtureDefBig.restitution = 0.6f;*/
 
 
+    }
+
+
+    public void onPause() {
+        dispose();
     }
 }
