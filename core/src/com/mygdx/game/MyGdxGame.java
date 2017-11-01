@@ -199,6 +199,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         img = new Texture("badlogic.jpg");
         imgCircle = new Texture("circle.png");
 
+
         sprite = new Sprite(img);
         spriteCircle = new Sprite(imgCircle);
         spriteCircle.setSize(80, 80);
@@ -698,7 +699,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
 
-        System.out.println("event fling");
+
+        System.out.println("event fling" + velocityX + " " + velocityY);
         return false;
     }
 
@@ -743,7 +745,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
         //fixtureDefSmall.friction = 0.4f;
-        fixtureDefSmall.restitution = 0.5f;
+        fixtureDefSmall.restitution = 0.0f;
 
 
        /* fixtureDefBig = new FixtureDef();

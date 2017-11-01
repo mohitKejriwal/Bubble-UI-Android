@@ -9,4 +9,10 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+
+    </style>
+
 </resources>
