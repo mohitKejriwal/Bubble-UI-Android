@@ -17,7 +17,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -134,9 +133,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     float prevX, prevY;
     private boolean DEBUG = false;
     private OrthographicCamera camera;
-    private Box2DDebugRenderer b2dr;
+    //private Box2DDebugRenderer b2dr;
     private World world;
-    private Body round4, round1, round2, round3, round5, round6;
+    //private Body round4, round1, round2, round3, round5, round6;
 
     @Override
     public void create () {
@@ -163,7 +162,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
         world = new World(new Vector2(0, 0), false);
 
-        b2dr = new Box2DDebugRenderer();
+        //b2dr = new Box2DDebugRenderer();
 
         batch1 = new SpriteBatch();
         batch2 = new SpriteBatch();
@@ -213,19 +212,19 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
         createFixtureDef();
-        round1 = createCircle(1f, 1, 1, 0);
-        round2 = createCircle(1f, -100, -100, 1);
-        round3 = createCircle(1f, -100, 100, 2);
-        round4 = createCircle(1f, 100, -100, 3);
-        round5 = createCircle(1f, 0, 100, 4);
-        round6 = createCircle(1f, -100, 0, 5);
+        createCircle(1, 1, 0);
+        createCircle(-100, -100, 1);
+        createCircle(-100, 100, 2);
+        createCircle(100, -100, 3);
+        createCircle(0, 100, 4);
+        createCircle(-100, 0, 5);
 
-        point = new Vector3(w / 2, h / 2, 0);
+        point = new Vector3(w, h / 2, 0);
         camera.unproject(point);
-        createWall(-point.x / (PPM), point.y / (PPM), point.x / (PPM), point.y / (PPM));
-        createWall(-point.x / (PPM), -point.y / (PPM), point.x / (PPM), -point.y / (PPM));
-        createWall(-point.x / (PPM), point.y / (PPM), -point.x / (PPM), -point.y / (PPM));
-        createWall(point.x / (PPM), point.y / (PPM), point.x / (PPM), -point.y / (PPM));
+        createWall(-point.x / (PPM), point.y / (PPM), point.x / (PPM), point.y / (PPM));     //top wall
+        createWall(-point.x / (PPM), -point.y / (PPM), point.x / (PPM), -point.y / (PPM));   //bottom wall
+        createWall(-point.x / (PPM), point.y / (PPM), -point.x / (PPM), -point.y / (PPM));   //left wall
+        createWall(point.x / (PPM), point.y / (PPM), point.x / (PPM), -point.y / (PPM));     //right wall
 
         //world.getBodies(bodies);
 
@@ -247,7 +246,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
-        b2dr.render(world, camera.combined.scl(PPM));
+        //b2dr.render(world, camera.combined.scl(PPM));
 
 
 
@@ -288,7 +287,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     @Override
     public void dispose() {
         world.dispose();
-        b2dr.dispose();
+        //b2dr.dispose();
         img.dispose();
         imgCircle.dispose();
         circleSmall.dispose();
@@ -324,7 +323,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         //inputUpdate(delta);
     }
 
-    public Body createWall(float x1, float x2, float x3, float x4) {
+    public Body createWall(float w1, float h1, float w2, float h2) {
        /* Body pBody;
         BodyDef def = new BodyDef();
 
@@ -355,11 +354,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
         EdgeShape edgeShape = new EdgeShape();
-        edgeShape.set(x1, x2, x3, x4);
+        edgeShape.set(w1, h1, w2, h2);
         FixtureDef fixtureDef2 = new FixtureDef();
         fixtureDef2.shape = edgeShape;
-        fixtureDef2.restitution = 0.6f;
-        fixtureDef2.density = 0.5f;
 
         Body bodyEdgeScreen = world.createBody(bodyDef2);
         bodyEdgeScreen.createFixture(fixtureDef2);
@@ -394,7 +391,15 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
         camera.update();
-        batchc1.setProjectionMatrix(camera.combined);
+
+        for (SpriteBatch batch : batchList) {
+            batch.setProjectionMatrix(camera.combined);
+        }
+
+        for (SpriteBatch batch : batchCList) {
+            batch.setProjectionMatrix(camera.combined);
+        }
+       /* batchc1.setProjectionMatrix(camera.combined);
         batchc2.setProjectionMatrix(camera.combined);
         batchc3.setProjectionMatrix(camera.combined);
         batchc4.setProjectionMatrix(camera.combined);
@@ -406,12 +411,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         batch3.setProjectionMatrix(camera.combined);
         batch4.setProjectionMatrix(camera.combined);
         batch5.setProjectionMatrix(camera.combined);
-        batch6.setProjectionMatrix(camera.combined);
+        batch6.setProjectionMatrix(camera.combined);*/
 
 
     }
 
-    public Body createCircle(float radius, float x, int y, int pos) {
+    public Body createCircle(float x, int y, int pos) {
         Body body = null;
         BodyDef bodyDef = null;
 
@@ -455,10 +460,10 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 */
     }
 
-    public void motionUpdate(float a, float b) {
+    public void motionUpdate(float a, float b, int factor) {
 
         float c = (float) Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
-        float d = c / 20;
+        float d = c / factor;
         Vector2 v1 = new Vector2(a / d, b / d);
 
         for (Body body : bodyList) {
@@ -466,7 +471,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
             //body.applyForce(v1, v2, false);
             body.setLinearVelocity(v1);
-
         }
 
     }
@@ -587,12 +591,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         System.out.println("event working drag");
 
 
-        point = new Vector3(screenX, screenY, 0);
-        /*Vector3 pointless = new Vector3();
+       /* point = new Vector3(screenX, screenY, 0);
+        *//*Vector3 pointless = new Vector3();
         pointless.x = point.x;
         pointless.y = point.y;
-        pointless.z = point.z;*/
-        camera.unproject(point);
+        pointless.z = point.z;*//*
+        camera.unproject(point);*/
 
 
         //batch.draw(texture, touchPos.x, touchPos.y, w, h);
@@ -620,9 +624,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
             }*/
 
 
-        motionUpdate(-(prevX - (point.x / PPM)), -(prevY - (point.y / PPM)));
+        /*motionUpdate(-(prevX - (point.x / PPM)), -(prevY - (point.y / PPM)));
         prevX = (point.x / PPM);
-        prevY = (point.y / PPM);
+        prevY = (point.y / PPM);*/
 
 
 
@@ -701,6 +705,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
         System.out.println("event fling" + velocityX + " " + velocityY);
+
+        if (Math.abs(velocityX) + Math.abs(velocityY) > 2000) {
+            motionUpdate(velocityX, -velocityY, 10);
+        } else {
+            motionUpdate(velocityX, -velocityY, 4);
+        }
         return false;
     }
 
@@ -745,7 +755,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
 
         //fixtureDefSmall.friction = 0.4f;
-        fixtureDefSmall.restitution = 0.0f;
 
 
        /* fixtureDefBig = new FixtureDef();
