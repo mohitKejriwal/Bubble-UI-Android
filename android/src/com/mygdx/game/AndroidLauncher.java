@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 
 import com.badlogic.gdx.backends.android.AndroidFragmentApplication;
 
+import java.util.ArrayList;
+
 public class AndroidLauncher extends FragmentActivity implements AndroidFragmentApplication.Callbacks {
 	/*@Override
 	protected void onCreate (Bundle savedInstanceState) {
@@ -21,6 +23,7 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 
 		// 6. Finally, replace the AndroidLauncher activity content with the Libgdx Fragment.
 
@@ -44,7 +47,8 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		// 5. Add the initializeForView() code in the Fragment's onCreateView method.
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-			return initializeForView(new MyGdxGame());
+			ArrayList<String> array = this.getArguments().getStringArrayList("colorList");
+			return initializeForView(new MyGdxGame(array));
 		}
 
 	}

@@ -33,6 +33,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     float batchHalf = 40;
     float logoSize = 40;
     float logoHalf = 20;
+    ArrayList<String> colorList;
     ArrayList<Body> bodyList;
     ArrayList<SpriteBatch> batchLogoList, batchCircleList;
     Vector3 point;
@@ -41,6 +42,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     float w,h;
     Sprite sprite, spriteCircle;
     Texture img, imgCircle;
+
     QueryCallback callbackDrag = new QueryCallback() {
         @Override
         public boolean reportFixture(Fixture fixture) {
@@ -51,6 +53,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
                 return true;
         }
     };
+
     QueryCallback callbackTap = new QueryCallback() {
         @Override
         public boolean reportFixture(Fixture fixture) {
@@ -63,6 +66,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     };
     private OrthographicCamera camera;
     private World world;
+
+
+    MyGdxGame(ArrayList<String> arrayList) {
+        colorList = arrayList;
+    }
+
 
     @Override
     public void create () {
@@ -97,12 +106,22 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         spriteCircle = new Sprite(imgCircle);
 
         createFixtureDef();
-        createCircle(1, 1, 0);
+        /*createCircle(1, 1, 0);
         createCircle(-100, -100, 1);
         createCircle(-100, 100, 2);
         createCircle(100, -100, 3);
-        createCircle(0, 100, 4);
+        createCircle(0, 100, 4);*/
+        createCircle(-100, 0, 0);
+        createCircle(-100, 0, 1);
+        createCircle(-100, 0, 2);
+        createCircle(-100, 0, 3);
+        createCircle(-100, 0, 4);
         createCircle(-100, 0, 5);
+        createCircle(-100, 0, 6);
+        createCircle(-100, 0, 7);
+        createCircle(-100, 0, 8);
+        createCircle(-100, 0, 9);
+
 
         for (int i = 0; i < bodyList.size(); i++) {
             batchLogoList.add(new SpriteBatch());
@@ -121,7 +140,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     @Override
     public void render() {
-        update(Gdx.graphics.getDeltaTime());
+        //update(Gdx.graphics.getDeltaTime());
+        update();
         Gdx.gl.glClearColor(255f, 255f, 255f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -131,7 +151,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
         int position = 0;
         for (Body body : bodyList) {
-            batchUpdate(batchCircleList.get(position), batchLogoList.get(position), body);
+            batchUpdate(batchCircleList.get(position), batchLogoList.get(position), body, colorList.get(position));
             position++;
         }
 
@@ -161,7 +181,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     }
 
-    public void update(float delta) {
+    public void update() {
         world.step(1 / 60f, 6, 2);
 
         for (Body body : bodyList) {
@@ -276,11 +296,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     }
 
 
-    public void batchUpdate(SpriteBatch batchCircle, SpriteBatch logoBatch, Body round) {
+    public void batchUpdate(SpriteBatch batchCircle, SpriteBatch logoBatch, Body round, String color) {
 
         batchCircle.begin();
         batchCircle.draw(spriteCircle, round.getPosition().x * PPM - batchHalf, round.getPosition().y * PPM - batchHalf, batchSize, batchSize);
-        batchCircle.setColor(Color.valueOf("#FF0000"));
+        //batchCircle.setColor(Color.valueOf("#"+color));
+        batchCircle.setColor(Color.argb8888(1, 0, 255, 0));
         batchCircle.end();
 
 
@@ -356,11 +377,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
             if (bodyThatWasTap != null) {
                 String[] data = (String[]) bodyThatWasTap.getUserData();
-                batchLogoList.get(Integer.parseInt(data[1]));
                 if (data[0].equalsIgnoreCase("selected")) {
+                    colorList.set(Integer.parseInt(data[1]), colorList.get(Integer.parseInt(data[1])).substring(2));
 
                     bodyThatWasTap.setUserData(new String[]{"unselected", data[1]});
                 } else {
+                    colorList.set(Integer.parseInt(data[1]), "64" + colorList.get(Integer.parseInt(data[1])));
 
                     bodyThatWasTap.setUserData(new String[]{"selected", data[1]});
                 }
