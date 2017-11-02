@@ -47,11 +47,6 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 			return initializeForView(new MyGdxGame());
 		}
 
-		@Override
-		public void onLowMemory() {
-			super.onLowMemory();
-			initializeForView(new MyGdxGame());
-		}
 	}
 }
 

@@ -12,9 +12,6 @@ public class MainActivity extends AppCompatActivity implements AndroidFragmentAp
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        /*Intent i = new Intent(this, AndroidLauncher.class);
-        startActivity(i);*/
-
 
         AndroidLauncher.GameFragment fragment = new AndroidLauncher.GameFragment();
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
