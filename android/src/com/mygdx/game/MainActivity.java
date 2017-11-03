@@ -45,5 +45,16 @@ public class MainActivity extends AppCompatActivity implements AndroidFragmentAp
         colorList.add("4CAF50");
         colorList.add("FFA000");
 
+        colorList.add("AB47BC");
+        colorList.add("F44336");
+        colorList.add("EC407A");
+        colorList.add("7E57C2");
+        colorList.add("3F51B5");
+        colorList.add("2196F3");
+        colorList.add("26C6DA");
+        colorList.add("26A69A");
+        colorList.add("4CAF50");
+        colorList.add("FFA000");
+
     }
 }

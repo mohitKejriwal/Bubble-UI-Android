@@ -3,8 +3,6 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -25,7 +23,7 @@ import com.badlogic.gdx.physics.box2d.World;
 
 import java.util.ArrayList;
 
-public class MyGdxGame extends ApplicationAdapter implements InputProcessor,GestureDetector.GestureListener {
+public class MyGdxGame extends ApplicationAdapter implements GestureDetector.GestureListener {
     float PPM = 32f;
     Body bodyThatWasHit, bodyThatWasTap;
 
@@ -42,17 +40,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     float w,h;
     Sprite sprite, spriteCircle;
     Texture img, imgCircle;
-
-    QueryCallback callbackDrag = new QueryCallback() {
-        @Override
-        public boolean reportFixture(Fixture fixture) {
-            if (fixture.testPoint(point.x / PPM, point.y / PPM)) {
-                bodyThatWasHit = fixture.getBody();
-                return false;
-            } else
-                return true;
-        }
-    };
 
     QueryCallback callbackTap = new QueryCallback() {
         @Override
@@ -77,21 +64,14 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     public void create () {
         batchLogoList = new ArrayList<SpriteBatch>();
         batchCircleList = new ArrayList<SpriteBatch>();
-
         bodyList = new ArrayList<Body>();
 
         w = Gdx.graphics.getWidth();
         h = Gdx.graphics.getHeight();
-/*
-        Gdx.input.setInputProcessor(this);
-*/
-        InputMultiplexer im = new InputMultiplexer();
+
         GestureDetector gd = new GestureDetector(this);
-        im.addProcessor(gd);
-        im.addProcessor(this);
+        Gdx.input.setInputProcessor(gd);
 
-
-        Gdx.input.setInputProcessor(im);
         camera = new OrthographicCamera();
         camera.setToOrtho(false, w / 2, h / 2);
 
@@ -101,33 +81,20 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         img = new Texture("badlogic.jpg");
         imgCircle = new Texture("circle.png");
 
-
         sprite = new Sprite(img);
         spriteCircle = new Sprite(imgCircle);
 
         createFixtureDef();
-        /*createCircle(1, 1, 0);
-        createCircle(-100, -100, 1);
-        createCircle(-100, 100, 2);
-        createCircle(100, -100, 3);
-        createCircle(0, 100, 4);*/
-        createCircle(-100, 0, 0);
-        createCircle(-100, 0, 1);
-        createCircle(-100, 0, 2);
-        createCircle(-100, 0, 3);
-        createCircle(-100, 0, 4);
-        createCircle(-100, 0, 5);
-        createCircle(-100, 0, 6);
-        createCircle(-100, 0, 7);
-        createCircle(-100, 0, 8);
-        createCircle(-100, 0, 9);
 
+        for (int i = 0; i < colorList.size(); i++) {
+            createCircle(15, -10, i);
+        }
 
         for (int i = 0; i < bodyList.size(); i++) {
             batchLogoList.add(new SpriteBatch());
             batchCircleList.add(new SpriteBatch());
-
         }
+
         point = new Vector3(w, h / 2, 0);
         camera.unproject(point);
         createWall(-point.x / (PPM), point.y / (PPM), point.x / (PPM), point.y / (PPM));     //top wall
@@ -135,6 +102,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         createWall(-point.x / (PPM), point.y / (PPM), -point.x / (PPM), -point.y / (PPM));   //left wall
         createWall(point.x / (PPM), point.y / (PPM), point.x / (PPM), -point.y / (PPM));     //right wall
 
+        motionUpdate(0, -100, 10);
 
     }
 
@@ -272,7 +240,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     public void gravityUpdate(Body round){
         float a =-(round.getPosition().x);
         float b =-(round.getPosition().y);
-        float c=(float)Math.sqrt(Math.pow(a, 2)+Math.pow(b, 2));
+        float c = (float) Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
         float d = c / 5;
 
         Vector2 v2 = new Vector2(round.getPosition().x,round.getPosition().y);
@@ -291,6 +259,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         for (Body body : bodyList) {
 
             body.setLinearVelocity(v1);
+
         }
 
     }
@@ -300,8 +269,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
         batchCircle.begin();
         batchCircle.draw(spriteCircle, round.getPosition().x * PPM - batchHalf, round.getPosition().y * PPM - batchHalf, batchSize, batchSize);
-        //batchCircle.setColor(Color.valueOf("#"+color));
-        batchCircle.setColor(Color.argb8888(1, 0, 255, 0));
+        batchCircle.setColor(Color.valueOf("#" + color));
         batchCircle.end();
 
 
@@ -311,58 +279,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
         logoBatch.end();
     }
 
-    @Override
-    public boolean keyDown(int keycode) {
-        return false;
-    }
 
-    @Override
-    public boolean keyUp(int keycode) {
-
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-
-        point = new Vector3(screenX, screenY, 0);
-        camera.unproject(point);
-
-        bodyThatWasHit = null;
-
-        world.QueryAABB(callbackDrag, point.x / PPM - 10, point.y / PPM - 10, point.x / PPM + 10, point.y / PPM + 10);
-
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        bodyThatWasHit = null;
-
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int amt) {
-        return false;
-    }
 
     @Override
     public boolean touchDown(float x, float y, int pointer, int button) {
@@ -371,9 +288,11 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
 
     @Override
     public boolean tap(float x, float y, int count, int button) {
+        System.out.println("event tp screen" + x + " " + y);
+
         point = new Vector3(x, y, 0);
         camera.unproject(point);
-        world.QueryAABB(callbackTap, point.x / PPM - 10, point.y / PPM - 10, point.x / PPM + 10, point.y / PPM + 10);     // value "10" is offset for touch co-ordinates...
+        world.QueryAABB(callbackTap, point.x / PPM, point.y / PPM, point.x / PPM, point.y / PPM);
 
             if (bodyThatWasTap != null) {
                 String[] data = (String[]) bodyThatWasTap.getUserData();
@@ -389,7 +308,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
             }
 
         bodyThatWasTap = null;
-
         return false;
     }
 
@@ -401,9 +319,10 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
 
-        if (Math.abs(velocityX) + Math.abs(velocityY) > 2000) {
+        float speed = Math.abs(velocityX) + Math.abs(velocityY);
+        if (speed > 1000) {
             motionUpdate(velocityX, -velocityY, 10);
-        } else {
+        } else if (speed > 100) {
             motionUpdate(velocityX, -velocityY, 4);
         }
         return false;
@@ -433,7 +352,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor,Gest
     public void pinchStop() {
 
     }
-
 
     public void createFixtureDef() {
         circleSmall = new CircleShape();
