@@ -3,6 +3,8 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -23,7 +25,7 @@ import com.badlogic.gdx.physics.box2d.World;
 
 import java.util.ArrayList;
 
-public class MyGdxGame extends ApplicationAdapter implements GestureDetector.GestureListener {
+public class MyGdxGame extends ApplicationAdapter implements GestureDetector.GestureListener, InputProcessor {
     float PPM = 32f;
     Body bodyThatWasHit, bodyThatWasTap;
 
@@ -37,7 +39,7 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
     Vector3 point;
     FixtureDef fixtureDefSmall;
     CircleShape circleSmall;
-    float w,h;
+    float w, h;
     Sprite sprite, spriteCircle;
     Texture img, imgCircle;
 
@@ -61,7 +63,7 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
 
 
     @Override
-    public void create () {
+    public void create() {
         batchLogoList = new ArrayList<SpriteBatch>();
         batchCircleList = new ArrayList<SpriteBatch>();
         bodyList = new ArrayList<Body>();
@@ -69,8 +71,11 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
         w = Gdx.graphics.getWidth();
         h = Gdx.graphics.getHeight();
 
+        InputMultiplexer im = new InputMultiplexer();
+        im.addProcessor(this);
         GestureDetector gd = new GestureDetector(this);
-        Gdx.input.setInputProcessor(gd);
+        im.addProcessor(gd);
+        Gdx.input.setInputProcessor(im);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, w / 2, h / 2);
@@ -124,7 +129,7 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
         }
 
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) Gdx.app.exit();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) Gdx.app.exit();
     }
 
     @Override
@@ -233,30 +238,32 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
         body.createFixture(fixtureDefSmall);
         body.setUserData(new String[]{"unselected", String.valueOf(pos)});
         bodyList.add(body);
-        return  body;
+        return body;
 
     }
 
-    public void gravityUpdate(Body round){
-        float a =-(round.getPosition().x);
-        float b =-(round.getPosition().y);
+    public void gravityUpdate(Body round) {
+        float a = -(round.getPosition().x);
+        float b = -(round.getPosition().y);
         float c = (float) Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
         float d = c / 5;
 
-        Vector2 v2 = new Vector2(round.getPosition().x,round.getPosition().y);
-        Vector2 v1 = new Vector2(a/d,b/d);
+        Vector2 v2 = new Vector2(round.getPosition().x, round.getPosition().y);
+        Vector2 v1 = new Vector2(a / d, b / d);
 
-        round.applyForce(v1,v2,false);
+        round.applyForce(v1, v2, false);
 
     }
 
     public void motionUpdate(float a, float b, int factor) {
 
-        float c = (float) Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
-        float d = c / factor;
-        Vector2 v1 = new Vector2(a / d, b / d);
 
         for (Body body : bodyList) {
+            a = a - (body.getPosition().x * 2);
+            b = b - (body.getPosition().y * 2);
+            float c = (float) Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+            float d = c / factor;
+            Vector2 v1 = new Vector2(a / d, b / d);
 
             body.setLinearVelocity(v1);
 
@@ -280,9 +287,9 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
     }
 
 
-
     @Override
     public boolean touchDown(float x, float y, int pointer, int button) {
+        System.out.println("event td " + x + y);
         return false;
     }
 
@@ -294,18 +301,18 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
         camera.unproject(point);
         world.QueryAABB(callbackTap, point.x / PPM, point.y / PPM, point.x / PPM, point.y / PPM);
 
-            if (bodyThatWasTap != null) {
-                String[] data = (String[]) bodyThatWasTap.getUserData();
-                if (data[0].equalsIgnoreCase("selected")) {
-                    colorList.set(Integer.parseInt(data[1]), colorList.get(Integer.parseInt(data[1])).substring(2));
+        if (bodyThatWasTap != null) {
+            String[] data = (String[]) bodyThatWasTap.getUserData();
+            if (data[0].equalsIgnoreCase("selected")) {
+                colorList.set(Integer.parseInt(data[1]), colorList.get(Integer.parseInt(data[1])).substring(2));
 
-                    bodyThatWasTap.setUserData(new String[]{"unselected", data[1]});
-                } else {
-                    colorList.set(Integer.parseInt(data[1]), "64" + colorList.get(Integer.parseInt(data[1])));
+                bodyThatWasTap.setUserData(new String[]{"unselected", data[1]});
+            } else {
+                colorList.set(Integer.parseInt(data[1]), "64" + colorList.get(Integer.parseInt(data[1])));
 
-                    bodyThatWasTap.setUserData(new String[]{"selected", data[1]});
-                }
+                bodyThatWasTap.setUserData(new String[]{"selected", data[1]});
             }
+        }
 
         bodyThatWasTap = null;
         return false;
@@ -355,11 +362,54 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
 
     public void createFixtureDef() {
         circleSmall = new CircleShape();
-        circleSmall.setRadius(1.5f);
+        circleSmall.setRadius(1.32f);
 
         fixtureDefSmall = new FixtureDef();
         fixtureDefSmall.shape = circleSmall;
         fixtureDefSmall.density = 1f;
 
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        point.set(screenX, screenY, 0);
+        camera.unproject(point);
+        motionUpdate(point.x, point.y, 10);
+        return false;
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(int amount) {
+        return false;
     }
 }
