@@ -29,8 +29,8 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
     float PPM = 32f;
     Body bodyThatWasHit, bodyThatWasTap;
 
-    float batchSize = 80;
-    float batchHalf = 40;
+    float batchSize = 86;
+    float batchHalf = 43;
     float logoSize = 40;
     float logoHalf = 20;
     ArrayList<String> colorList;
@@ -262,10 +262,14 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
             a = a - (body.getPosition().x * 2);
             b = b - (body.getPosition().y * 2);
             float c = (float) Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
-            float d = c / factor;
+            float d = c / 10;
             Vector2 v1 = new Vector2(a / d, b / d);
 
             body.setLinearVelocity(v1);
+            /*Vector2 v2 = new Vector2(body.getPosition().x, body.getPosition().y);
+
+            body.applyForce(v1, v2, false);*/
+
 
         }
 
@@ -326,12 +330,12 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
 
-        float speed = Math.abs(velocityX) + Math.abs(velocityY);
+       /* float speed = Math.abs(velocityX) + Math.abs(velocityY);
         if (speed > 1000) {
-            motionUpdate(velocityX, -velocityY, 10);
+            motionUpdate(velocityX*200, -velocityY*200, 10);
         } else if (speed > 100) {
-            motionUpdate(velocityX, -velocityY, 4);
-        }
+            motionUpdate(velocityX*20, -velocityY*20, 4);
+        }*/
         return false;
     }
 
@@ -362,7 +366,7 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
 
     public void createFixtureDef() {
         circleSmall = new CircleShape();
-        circleSmall.setRadius(1.32f);
+        circleSmall.setRadius(1.4f);
 
         fixtureDefSmall = new FixtureDef();
         fixtureDefSmall.shape = circleSmall;
