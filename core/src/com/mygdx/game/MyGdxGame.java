@@ -26,7 +26,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import java.util.ArrayList;
 
 public class MyGdxGame extends ApplicationAdapter implements GestureDetector.GestureListener, InputProcessor {
-    float PPM = 32f;
+    float PPM = 32f, alpha = 0;
     Body bodyThatWasHit, bodyThatWasTap;
 
     float batchSize = 86;
@@ -77,6 +77,7 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
         im.addProcessor(gd);
         Gdx.input.setInputProcessor(im);
 
+        //Color c=Color.valueOf(colorList.get(0));
         camera = new OrthographicCamera();
         camera.setToOrtho(false, w / 2, h / 2);
 
@@ -255,21 +256,18 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
 
     }
 
-    public void motionUpdate(float a, float b, int factor) {
+    public void motionUpdate(float a, float b, int speedFactor) {
 
 
         for (Body body : bodyList) {
             a = a - (body.getPosition().x * 2);
             b = b - (body.getPosition().y * 2);
             float c = (float) Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
-            float d = c / 10;
+            float d = c / speedFactor;
             Vector2 v1 = new Vector2(a / d, b / d);
-
             body.setLinearVelocity(v1);
             /*Vector2 v2 = new Vector2(body.getPosition().x, body.getPosition().y);
-
             body.applyForce(v1, v2, false);*/
-
 
         }
 
@@ -280,13 +278,13 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
 
         batchCircle.begin();
         batchCircle.draw(spriteCircle, round.getPosition().x * PPM - batchHalf, round.getPosition().y * PPM - batchHalf, batchSize, batchSize);
-        batchCircle.setColor(Color.valueOf("#" + color));
+        batchCircle.setColor(Color.valueOf(color));
+        //batchCircle.setColor(new Color(1,0,0,alpha));
         batchCircle.end();
 
 
         logoBatch.begin();
         logoBatch.draw(sprite, round.getPosition().x * PPM - logoHalf, round.getPosition().y * PPM - logoHalf, logoSize, logoSize);
-        logoBatch.setColor(Color.valueOf("#FFFFFF"));
         logoBatch.end();
     }
 
@@ -308,11 +306,11 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
         if (bodyThatWasTap != null) {
             String[] data = (String[]) bodyThatWasTap.getUserData();
             if (data[0].equalsIgnoreCase("selected")) {
-                colorList.set(Integer.parseInt(data[1]), colorList.get(Integer.parseInt(data[1])).substring(2));
+                colorList.set(Integer.parseInt(data[1]), colorList.get(Integer.parseInt(data[1])).substring(0, 7));
 
                 bodyThatWasTap.setUserData(new String[]{"unselected", data[1]});
             } else {
-                colorList.set(Integer.parseInt(data[1]), "64" + colorList.get(Integer.parseInt(data[1])));
+                colorList.set(Integer.parseInt(data[1]), colorList.get(Integer.parseInt(data[1])) + "64");
 
                 bodyThatWasTap.setUserData(new String[]{"selected", data[1]});
             }
