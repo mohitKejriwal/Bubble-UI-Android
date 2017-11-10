@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import java.util.ArrayList;
+
 /**
  * Created by mohit on 11/9/2017.
  */
@@ -7,5 +9,5 @@ package com.mygdx.game;
 public interface AccessActivity {
     void showToast(String text);
 
-    void showCount(String text);
+    void showCount(ArrayList<String> brandSelect);
 }

@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements AndroidFragmentAp
     int fileName = 0;
     String cachePath;
     TextView count;
+    ArrayList<String> brandsID;
     ArrayList<String> colorList = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,4 +141,7 @@ public class MainActivity extends AppCompatActivity implements AndroidFragmentAp
     }
 
 
+    public void setBrands(ArrayList<String> brandsSelect) {
+        brandsID = brandsSelect;
+    }
 }
