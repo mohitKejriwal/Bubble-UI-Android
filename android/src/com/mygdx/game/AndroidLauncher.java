@@ -24,9 +24,7 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-
 		// 6. Finally, replace the AndroidLauncher activity content with the Libgdx Fragment.
-
 
     }
 
@@ -42,14 +40,22 @@ public class AndroidLauncher extends FragmentActivity implements AndroidFragment
 		// 5. Add the initializeForView() code in the Fragment's onCreateView method.
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-			ArrayList<String> array = this.getArguments().getStringArrayList("colorList");
-            //byte[] arrayLogo = this.getArguments().getByteArray("logos");
-            return initializeForView(new MyGdxGame(array));
+			ArrayList<String> array;
+			String path;
+			array = this.getArguments().getStringArrayList("colorList");
+			path = this.getArguments().getString("cachePath");
+
+			AndroidResolver an = new AndroidResolver(getContext());
+
+			return initializeForView(new MyGdxGame(array, path, an));
 
         }
-    }
 
 
-
+	}
 }
+
+
+
+
 

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -23,12 +24,16 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class MyGdxGame extends ApplicationAdapter implements GestureDetector.GestureListener, InputProcessor {
-    float PPM = 32f, alpha = 0;
-    Body bodyThatWasHit, bodyThatWasTap;
+    float PPM = 32f;
+    Body bodyThatWasTap;
+    AccessActivity mainActivity;
 
+
+    int fileName = 0;
     float batchSize = 86;
     float batchHalf = 43;
     float logoSize = 40;
@@ -36,12 +41,18 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
     ArrayList<String> colorList;
     ArrayList<Body> bodyList;
     ArrayList<SpriteBatch> batchLogoList, batchCircleList;
+    ArrayList<Texture> imageList;
+    ArrayList<Sprite> spriteList;
+    ArrayList<String> brandSelect;
+
     Vector3 point;
     FixtureDef fixtureDefSmall;
     CircleShape circleSmall;
     float w, h;
-    Sprite sprite, spriteCircle;
-    Texture img, imgCircle;
+    Sprite spriteCircle;
+    Texture imgCircle;
+    String path;
+
 
     QueryCallback callbackTap = new QueryCallback() {
         @Override
@@ -57,16 +68,24 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
     private World world;
 
 
-    MyGdxGame(ArrayList<String> arrayList) {
+    MyGdxGame(ArrayList<String> arrayList, String path, AccessActivity mainActivity) {
         colorList = arrayList;
+        this.path = path;
+        this.mainActivity = mainActivity;
     }
 
 
     @Override
     public void create() {
+        Gdx.gl.glClearColor(255f, 255f, 255f, 1f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         batchLogoList = new ArrayList<SpriteBatch>();
         batchCircleList = new ArrayList<SpriteBatch>();
         bodyList = new ArrayList<Body>();
+        imageList = new ArrayList<Texture>();
+        spriteList = new ArrayList<Sprite>();
+        brandSelect = new ArrayList<String>();
 
         w = Gdx.graphics.getWidth();
         h = Gdx.graphics.getHeight();
@@ -77,29 +96,23 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
         im.addProcessor(gd);
         Gdx.input.setInputProcessor(im);
 
-        //Color c=Color.valueOf(colorList.get(0));
         camera = new OrthographicCamera();
         camera.setToOrtho(false, w / 2, h / 2);
 
         world = new World(new Vector2(0, 0), false);
 
-
-        img = new Texture("badlogic.jpg");
         imgCircle = new Texture("circle.png");
-
-        sprite = new Sprite(img);
         spriteCircle = new Sprite(imgCircle);
-
         createFixtureDef();
 
         for (int i = 0; i < colorList.size(); i++) {
+            imageList.add(new Texture(new FileHandle(new File(path, "brand" + fileName))));
+            spriteList.add(new Sprite(imageList.get(i)));
             createCircle(15, -10, i);
-        }
-
-        for (int i = 0; i < bodyList.size(); i++) {
             batchLogoList.add(new SpriteBatch());
             batchCircleList.add(new SpriteBatch());
         }
+
 
         point = new Vector3(w, h / 2, 0);
         camera.unproject(point);
@@ -125,7 +138,7 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
 
         int position = 0;
         for (Body body : bodyList) {
-            batchUpdate(batchCircleList.get(position), batchLogoList.get(position), body, colorList.get(position));
+            batchUpdate(batchCircleList.get(position), batchLogoList.get(position), body, colorList.get(position), spriteList.get(position));
             position++;
         }
 
@@ -142,10 +155,12 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
     public void dispose() {
         world.dispose();
         //b2dr.dispose();
-        img.dispose();
         imgCircle.dispose();
         circleSmall.dispose();
 
+        for (Texture img : imageList) {
+            img.dispose();
+        }
         for (SpriteBatch spritebatch : batchLogoList) {
             spritebatch.dispose();
         }
@@ -167,7 +182,7 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
         //inputUpdate(delta);
     }
 
-    public Body createWall(float w1, float h1, float w2, float h2) {
+    public void createWall(float w1, float h1, float w2, float h2) {
 
 
         BodyDef bodyDef2 = new BodyDef();
@@ -183,7 +198,6 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
         Body bodyEdgeScreen = world.createBody(bodyDef2);
         bodyEdgeScreen.createFixture(fixtureDef2);
         edgeShape.dispose();
-        return bodyEdgeScreen;
     }
 
     public void inputUpdate(float delta) {
@@ -223,7 +237,7 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
 
     }
 
-    public Body createCircle(float x, int y, int pos) {
+    public void createCircle(float x, int y, int pos) {
         Body body = null;
         BodyDef bodyDef = null;
 
@@ -237,9 +251,8 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
 
 
         body.createFixture(fixtureDefSmall);
-        body.setUserData(new String[]{"unselected", String.valueOf(pos)});
+        body.setUserData(String.valueOf(pos));
         bodyList.add(body);
-        return body;
 
     }
 
@@ -274,17 +287,16 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
     }
 
 
-    public void batchUpdate(SpriteBatch batchCircle, SpriteBatch logoBatch, Body round, String color) {
+    public void batchUpdate(SpriteBatch batchCircle, SpriteBatch logoBatch, Body round, String color, Sprite spriteLogo) {
 
         batchCircle.begin();
         batchCircle.draw(spriteCircle, round.getPosition().x * PPM - batchHalf, round.getPosition().y * PPM - batchHalf, batchSize, batchSize);
         batchCircle.setColor(Color.valueOf(color));
-        //batchCircle.setColor(new Color(1,0,0,alpha));
         batchCircle.end();
 
 
         logoBatch.begin();
-        logoBatch.draw(sprite, round.getPosition().x * PPM - logoHalf, round.getPosition().y * PPM - logoHalf, logoSize, logoSize);
+        logoBatch.draw(spriteLogo, round.getPosition().x * PPM - logoHalf, round.getPosition().y * PPM - logoHalf, logoSize, logoSize);
         logoBatch.end();
     }
 
@@ -304,16 +316,24 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
         world.QueryAABB(callbackTap, point.x / PPM, point.y / PPM, point.x / PPM, point.y / PPM);
 
         if (bodyThatWasTap != null) {
-            String[] data = (String[]) bodyThatWasTap.getUserData();
-            if (data[0].equalsIgnoreCase("selected")) {
-                colorList.set(Integer.parseInt(data[1]), colorList.get(Integer.parseInt(data[1])).substring(0, 7));
+            String data = (String) bodyThatWasTap.getUserData();
+            if (brandSelect.contains(data)) {
+                brandSelect.remove(data);
+                colorList.set(Integer.parseInt(data), colorList.get(Integer.parseInt(data)).substring(0, 7));
 
-                bodyThatWasTap.setUserData(new String[]{"unselected", data[1]});
+                //bodyThatWasTap.setUserData(new String[]{"unselected", data[1]});
             } else {
-                colorList.set(Integer.parseInt(data[1]), colorList.get(Integer.parseInt(data[1])) + "64");
+                if (brandSelect.size() < 5) {
 
-                bodyThatWasTap.setUserData(new String[]{"selected", data[1]});
+                    brandSelect.add(data);
+                    colorList.set(Integer.parseInt(data), colorList.get(Integer.parseInt(data)) + "64");
+                } else {
+                    mainActivity.showToast("You have selected 5 brands");
+
+                }
+                //bodyThatWasTap.setUserData(new String[]{"selected", data[1]});
             }
+
         }
 
         bodyThatWasTap = null;
