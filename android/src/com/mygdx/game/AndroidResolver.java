@@ -3,6 +3,7 @@ package com.mygdx.game;
 
 import android.content.Context;
 import android.os.Handler;
+import android.view.View;
 import android.widget.Toast;
 
 /**
@@ -12,11 +13,13 @@ import android.widget.Toast;
 public class AndroidResolver implements AccessActivity {
     android.os.Handler handler;
     Context context;
-
+    MainActivity m;
 
     public AndroidResolver(Context context) {
         handler = new Handler();
         this.context = context;
+        m = (MainActivity) context;
+
     }
 
     @Override
@@ -25,10 +28,27 @@ public class AndroidResolver implements AccessActivity {
             @Override
             public void run() {
                 Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
-                MainActivity m = (MainActivity) context;
-                m.count.setText(text);
             }
         });
+    }
+
+    @Override
+    public void showCount(final String text) {
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                int selection = 5 - Integer.parseInt(text);
+                if (selection > 0) {
+                    m.fabSubmit.setVisibility(View.GONE);
+                    m.count.setText("Select your top " + String.valueOf(selection) + " favourite brands");
+                } else {
+                    m.fabSubmit.setVisibility(View.VISIBLE);
+                    m.count.setText("You have selected 5 brands");
+                }
+            }
+        });
+
     }
 
 

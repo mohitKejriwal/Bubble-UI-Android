@@ -320,6 +320,7 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
             if (brandSelect.contains(data)) {
                 brandSelect.remove(data);
                 colorList.set(Integer.parseInt(data), colorList.get(Integer.parseInt(data)).substring(0, 7));
+                mainActivity.showCount(String.valueOf(brandSelect.size()));
 
                 //bodyThatWasTap.setUserData(new String[]{"unselected", data[1]});
             } else {
@@ -327,8 +328,9 @@ public class MyGdxGame extends ApplicationAdapter implements GestureDetector.Ges
 
                     brandSelect.add(data);
                     colorList.set(Integer.parseInt(data), colorList.get(Integer.parseInt(data)) + "64");
+                    mainActivity.showCount(String.valueOf(brandSelect.size()));
                 } else {
-                    mainActivity.showToast("You have selected 5 brands");
+                    mainActivity.showToast("You have already selected 5 brands");
 
                 }
                 //bodyThatWasTap.setUserData(new String[]{"selected", data[1]});

@@ -6,4 +6,6 @@ package com.mygdx.game;
 
 public interface AccessActivity {
     void showToast(String text);
+
+    void showCount(String text);
 }
